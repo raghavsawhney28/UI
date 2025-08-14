@@ -16,6 +16,8 @@
             background-color: #000000;
             color: #e5e7eb; /* gray-200 */
             font-family: 'VT323', monospace;
+            /* Custom diamond cursor */
+            cursor: url("data:image/svg+xml;charset=utf-8,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 2L22 12L12 22L2 12L12 2Z' fill='white' stroke='black' stroke-width='2'/%3E%3C/svg%3E") 12 12, auto;
         }
         /* Custom scrollbar */
         body::-webkit-scrollbar {
@@ -260,14 +262,9 @@
                         torch.position.set(0, 0, 0);
                         torch.lookAt(targetVector);
                         
-                        // Base opacity on scroll progress (fade in/out)
                         const baseOpacity = Math.sin(progress * Math.PI);
-
-                        // Add a rapid flicker effect on top of the base opacity
                         const flickerSpeed = 30;
                         const flicker = Math.floor(elapsedTime * flickerSpeed) % 2 === 0 ? 1.0 : 0.4;
-
-                        // Combine them
                         torch.material.opacity = baseOpacity * flicker;
                     }
                 }
@@ -286,19 +283,24 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // Animate stars
+            // Animate stars forward
             const positions = starGeometry.attributes.position.array;
             for (let i = 0; i < positions.length; i += 3) {
-                positions[i + 2] += 0.3; // Move star along z-axis
+                positions[i + 2] += 0.3; 
                 if (positions[i + 2] > 1000) {
-                    positions[i + 2] = -1000; // Reset star if it goes past camera
+                    positions[i + 2] = -1000; 
                 }
             }
             starGeometry.attributes.position.needsUpdate = true;
 
-            globeGroup.rotation.y += 0.0002;
-            camera.position.x += (mouseX * 2 - camera.position.x) * 0.02;
-            camera.position.y += (mouseY * 2 - camera.position.y) * 0.02;
+            // Add starfield interaction with cursor (Increased speed)
+            const fastFactor = 0.1;
+            stars.rotation.y += (mouseX * 0.1 - stars.rotation.y) * fastFactor;
+            stars.rotation.x += (mouseY * 0.1 - stars.rotation.x) * fastFactor;
+
+            // Animate globe and main camera parallax (Increased speed)
+            camera.position.x += (mouseX * 2 - camera.position.x) * fastFactor;
+            camera.position.y += (mouseY * 2 - camera.position.y) * fastFactor;
             camera.lookAt(scene.position);
             renderer.render(scene, camera);
         }
